@@ -1,0 +1,29 @@
+---
+title: ""
+author: "Miles per Group (MPG): Makyra Kim, Alexandar Gomez"
+format: html
+---
+
+## Introduction
+(Your text here)
+
+## Research Questions
+(Your text here)
+
+## Data Exploration
+(Your text here)
+
+## Multiple Linear Regression Model
+(Your text here)
+
+## Improving the Model
+(Your text here)
+
+## Formal Hypothesis Tests
+(Your text here)
+
+## Robustness of Results
+(Your text here)
+
+## Conclusions
+(Your text here)
