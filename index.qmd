@@ -5,25 +5,192 @@ format: html
 ---
 
 ## Introduction
-(Your text here)
+
+Our group Miles Per Group selected the dataset `mpg` from the built-in ggplot2 package in R and decided to use it for the project.
+
+As everyday car users and seniors who will soon be purchasing their own vehicles, we thought it would be meaningful to examine the fuel efficiency data of different cars and see what impacts the fuel efficiency of a car the most. Fuel economy has practical importance for us as soon-to-be early-career workers who are mindful of transportation costs and for understanding the environmental impact associated with different types of cars.
+
+```{r}
+data(mpg, package = "ggplot2")
+??mpg
+nrow(mpg)
+mpg
+```
+
+The dataset contains 234 observations of vehicles manufactured between 1999 and 2008 (rows), and there are 11 variables present in total: six are categorical variables (`manufacturer`, `model`, `trans`, `drv`, `fl`, and `class`) and five numeric (`displ`, `year`, `cyl`, `cty`, `hwy`).
+
+Below is a list of all variables present in the dataset and their corresponding descriptions:
+
+manufacturer
+
+:   manufacturer name
+
+model
+
+:   model name
+
+displ
+
+:   engine displacement, in litres
+
+year
+
+:   year of manufacture
+
+cyl
+
+:   number of cylinders
+
+trans
+
+:   type of transmission
+
+drv
+
+:   the type of drive train, where f = front-wheel drive, r = rear wheel drive, 4 = 4wd
+
+cty
+
+:   city miles per gallon
+
+hwy
+
+:   highway miles per gallon
+
+fl
+
+:   fuel type
+
+class
+
+:   "type" of car
+
+The **primary outcome of interest** in this analysis is the highway miles per gallon (`hwy`), a numeric variable that measures how efficiently a vehicle uses fuel during highway driving conditions.
+
+The **predictors of interest** are engine displacement in L (`displ`), car type (`class`), and drive train type (`drv`). Possible groups for car types are 2-seater, compact, midsize, minivan, pickup, subcompact, and SUV. Possible groups for type of drive train are front-wheel drive (`f`), rear-wheel drive (`r`), and four-wheel drive (`4`).
+
+```{r}
+table(mpg$class)
+```
+
+There are 5 2-seaters, 47 compacts, 41 midsize, 11 minivans, 33 pickup trucks, 35 subcompacts, and 62 SUV vehicles.
+
+```{r}
+table(mpg$drv)
+```
+
+There are 103 four-wheel drive vehicles, 106 front-wheel drive vehicles, and 25 rear-wheel drive vehicles.
 
 ## Research Questions
-(Your text here)
+
+**Hypothesis 1**: Vehicles with larger engines (higher `displ` value) have lower highway fuel efficiency.
+
+-   We assume that cars with larger engines will burn more fuel.
+
+**Hypothesis 2**: SUV and pickup trucks have lower highway MPG than compact or midsize cars.
+
+-   We assume those bigger and heavier vehicle classes require more energy and thus less fuel economy efficiency.
+
+**Hypothesis 3**: Front-wheel drive vehicles have higher highway MPG than four-wheel drive or rear-wheel drive vehicles.
+
+-   We assume that for daily use, front-wheel drive, which sends power only to the front wheels, would be more efficient than four-wheel drive, which distributes power to all four wheels or rear-wheel drive, which powers the rear wheels (front wheels only steer).
 
 ## Data Exploration
-(Your text here)
+
+```{r}
+plot(mpg$displ, mpg$hwy, main = "Engine Displacement vs. Highway MPG", xlab = "Engine displacement (L)", ylab = "Highway miles per gallon", col="green")
+```
+
+Based on the scatterplot of engine displacement and highway MPG, it seems that blah blah. blah
+
+```{r}
+boxplot(hwy ~ class, data = mpg, main = "Car Type vs. Highway MPG", xlab = "Car type", ylab = "Highway miles per gallon", col = "light blue")
+```
+
+blah blah blah
+
+```{r}
+boxplot(hwy ~ drv, data = mpg, main = "Drive Train Type vs. Highway MPG", xlab = "Drive train type", ylab = "Highway miles per gallon", col = "pink")
+```
+
+blah blah
 
 ## Multiple Linear Regression Model
-(Your text here)
+
+Now, we will fit a multiple linear regression model to predict `hwy` using `displ`, `drv`, and `class`.
+
+```{r}
+hwy_lm <- lm(hwy ~ displ + drv + class, data = mpg)
+summary(hwy_lm)
+```
+
+### Interpreting estimates of slopes
+
+Based on the summary, the reference levels are four-wheel drive (`f`) for drive train type (`drv`) and 2-seater for the car type (`class`) as they both are not present as a coefficient.
+
+The estimated coefficient for `displ` is -2.1923. This means that for each unit (L) increase in engine displacement, `hwy` is expected to decrease by 2.1923 MPG, assuming all other variables are held constant. Since the p-value is less than 0.05, there is a meaningful relationship between the two variables.
+
+Compared to the four-wheel drive, front-wheel drive vehicles (`drvf`) have 3.1676 higher highway MPG, assuming the other variables are held constant. There is a meaningful relationship between the two variables as the p-value is less than 0.05. On the other hand, rear-wheel drive vehicles (`drvr`) have 1.4251 higher MPG than four-wheel drive vehicles, assuming other variables are held constant, though there does not seem to be a meaningful relationship given that the p-value is greater than 0.05 (0.068).
+
+As for the car types:
+
+-   Compact vehicles have 5.8422 lower MPG than 2-seater vehicles, assuming other variables are held constant. Since the p-value is less than 0.05, there is a meaningful relationship between the two variables.
+
+-   Midsize vehicles have 6.1168 lower MPG than 2-seater vehicles, assuming other variables are held constant. Since the p-value is less than 0.05, there is a meaningful relationship between the two variables.
+
+-   Minivan vehicles have 10.2495 lower MPG than 2-seater vehicles, assuming other variables are held constant. Since the p-value is less than 0.05, there is a meaningful relationship between the two variables.
+
+-   Pickup vehicles have 10.3147 lower MPG than 2-seater vehicles, assuming other variables are held constant. Since the p-value is less than 0.05, there is a meaningful relationship between the two variables.
+
+-   Subcompact vehicles have 5.2616 lower MPG than 2-seater vehicles, assuming other variables are held constant. Since the p-value is less than 0.05, there is a meaningful relationship between the two variables.
+
+-   SUV vehicles have 9.2334 lower MPG than 2-seater vehicles, assuming other variables are held constant. Since the p-value is less than 0.05, there is a meaningful relationship between the two variables.
+
+### Interpreting R-squared
+
+The R\^2 value is 0.8155 according to the summary. This means that the predictor variables engine displacement, drive train type, and car type, explains 81.55% of the variability in the outcome variable, `hwy`. In other words, 81.55% of the variability of highway MPG in the data can be accounted for by engine displacement, drive train type, and car type.
+
+### Residual standard error and the accuracy of our model 
+
+From the summary, it could also be observed that the residual standard error is 2.609, meaning that the typical difference between the highway MPG predicted by the model and the actual MPG is about 2.609 miles per gallon. Given that highway MPG values in the dataset range from 12 to 44, a 2.609 miles per gallon difference is fairly small, indicating that the model predicts highway MPG with reasonable good accuracy.
+
+```{r}
+min(mpg$hwy)
+max(mpg$hwy)
+```
+
+### Performing F-test
+
+```{r}
+anova(hwy_lm)
+```
+
+Null hypothesis:
+
+$
+H_0: \beta_1 = \beta_2  ... = \beta_P = 0;  \text{all of the regression coefficients are zero.}
+$
+
+Alternative hypothesis:
+
+$
+H_1: \text{At least one of the regression coefficient is non-zero.}
+$
+
+Based on the results of the overall f-test, `displ` was associated with `hwy`. `drv` was associated with `hwy` after controlling `displ`. `class` was associated with `hwy` after controlling `displ` and `drv`. Since the p-values are all less than 0.05, we reject the null hypothesis that none of the three regression coefficients are useful for predicting the highway MPG, assuming we are controlling for all of the other variables. At least one of the predictor variables has a coefficient that is different from zero and is related to `hwy`.
 
 ## Improving the Model
+
 (Your text here)
 
 ## Formal Hypothesis Tests
+
 (Your text here)
 
 ## Robustness of Results
+
 (Your text here)
 
 ## Conclusions
+
 (Your text here)
