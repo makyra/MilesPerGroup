@@ -247,6 +247,15 @@ The scale-location plot also shows a flatter, less curvy trend compared to the u
 
 In the Q-Q plot, the residuals for the square-root model are closer to the line than in the original model, especially in the right tail. The right tail 's fit has improved greatly and the deviation has become less severe. However, the left tail bends downward more greatly than before, indicating ta slightly worse fit in the region. **Overall, the normality assumption is somewhat improved, while not entirely. Compared to the log-transformation's, the square-root transformation shows less left-tail deviation but greater right-tail deviation.**
 
+### Splining
+```{r}
+library(splines)
+mpg_spline <- lm(hwy ~ bs(displ, 3), data = mpg)
+summary(mpg_spline)
+plot(mpg$displ, mpg$hwy)
+lines(mpg$displ, predict(mpg_spline), col = 4, lwd = 2)
+```
+
 ## Formal Hypothesis Tests
 
 (Your text here)
