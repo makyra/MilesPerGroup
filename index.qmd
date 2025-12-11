@@ -251,10 +251,18 @@ In the Q-Q plot, the residuals for the square-root model are closer to the line 
 ```{r}
 library(splines)
 mpg_spline <- lm(hwy ~ bs(displ, 3), data = mpg)
-summary(mpg_spline)
+
 plot(mpg$displ, mpg$hwy)
-lines(mpg$displ, predict(mpg_spline), col = 4, lwd = 2)
+sorted_idx <- order(mpg$displ)
+lines(mpg$displ[sorted_idx], predict(mpg_spline)[sorted_idx], col = 4, lwd = 2)
+# lines(mpg$displ, predict(mpg_spline), col = 4, lwd = 2)
+
+mpg_spline <- lm(hwy ~ bs(displ, 3) + drv + class, data = mpg)
+autoplot(mpg_spline)
 ```
+After splining displacement against highway mpg, we can visually see a line that fits the data better than a linear model, but for the entire model, this may not lead to an improvment.
+
+The model containing the spline relationship shows an improvement for normally distributed standard residuals, but the Scale-Location plot and Residuals vs. Fitted do not look any better than the original model without any splining. It is worth mentioning that that the improvements in the Normal Q-Q plot are only seen on the left side of the graph. The right still contains systematic deviations away from the line.
 
 ## Formal Hypothesis Tests
 
