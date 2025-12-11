@@ -8,13 +8,13 @@ format: html
 
 Our group Miles Per Group selected the dataset `mpg` from the built-in ggplot2 package in R and decided to use it for the project.
 
-As everyday car users and seniors who will soon be purchasing their own vehicles, we thought it would be meaningful to examine the fuel efficiency data of different cars and see what impacts the fuel efficiency of a car the most. Fuel economy has practical importance for us as soon-to-be early-career workers who are mindful of transportation costs and for understanding the environmental impact associated with different types of cars.
+As everyday car users and seniors who will soon be purchasing their own vehicles, our group thought it would be meaningful to examine the fuel efficiency data of different cars and see what impacts the fuel efficiency of a car the most. Fuel economy has practical importance for us as soon-to-be early-career workers who are mindful of transportation costs and for understanding the environmental impact associated with different types of cars.
 
 ```{r}
 data(mpg, package = "ggplot2")
 ??mpg
 nrow(mpg)
-mpg
+head(mpg)
 ```
 
 The dataset contains 234 observations of vehicles manufactured between 1999 and 2008 (rows), and there are 11 variables present in total: six are categorical variables (`manufacturer`, `model`, `trans`, `drv`, `fl`, and `class`) and five numeric (`displ`, `year`, `cyl`, `cty`, `hwy`).
@@ -150,7 +150,7 @@ As for the car types:
 
 The R\^2 value is 0.8155 according to the summary. This means that the predictor variables engine displacement, drive train type, and car type, explains 81.55% of the variability in the outcome variable, `hwy`. In other words, 81.55% of the variability of highway MPG in the data can be accounted for by engine displacement, drive train type, and car type.
 
-### Residual standard error and the accuracy of our model 
+### Residual standard error and the accuracy of our model
 
 From the summary, it could also be observed that the residual standard error is 2.609, meaning that the typical difference between the highway MPG predicted by the model and the actual MPG is about 2.609 miles per gallon. Given that highway MPG values in the dataset range from 12 to 44, a 2.609 miles per gallon difference is fairly small, indicating that the model predicts highway MPG with reasonable good accuracy.
 
@@ -167,21 +167,85 @@ anova(hwy_lm)
 
 Null hypothesis:
 
-$
-H_0: \beta_1 = \beta_2  ... = \beta_P = 0;  \text{all of the regression coefficients are zero.}
-$
+$H_0: \beta_1 = \beta_2 ... = \beta_P = 0; \text{all of the regression coefficients are zero.}$
 
 Alternative hypothesis:
 
-$
-H_1: \text{At least one of the regression coefficient is non-zero.}
-$
+$H_1: \text{At least one of the regression coefficient is non-zero.}$
 
-Based on the results of the overall f-test, `displ` was associated with `hwy`. `drv` was associated with `hwy` after controlling `displ`. `class` was associated with `hwy` after controlling `displ` and `drv`. Since the p-values are all less than 0.05, we reject the null hypothesis that none of the three regression coefficients are useful for predicting the highway MPG, assuming we are controlling for all of the other variables. At least one of the predictor variables has a coefficient that is different from zero and is related to `hwy`.
+Based on the results of the overall f-test, `displ` was associated with `hwy`. `drv` was associated with `hwy` after controlling `displ`. `class` was associated with `hwy` after controlling `displ` and `drv`. Since the p-values are all less than 0.05, we reject the null hypothesis that none of the three regression coefficients are useful for predicting the highway MPG, assuming we are controlling for all of the other variables. At least one of the predictor variables has a coefficient that is different from zero and is thus related to `hwy`.
 
 ## Improving the Model
 
-(Your text here)
+Now, we will run diagnostics to ensure that none of the regression assumptions are violated. We will check for linearity, constant variance, and normality.
+
+```{r}
+library(ggfortify)
+
+autoplot(hwy_lm)
+```
+
+### Linearity Assumption
+
+The residual vs. fitted plot shows a systematic deviation of the residuals from 0. In some place, most of the residuals are either above the horizontal line or below the horizontal line. Residuals are mostly positive at lower fitted values and the higher fitted values, and the line displays a curve. **This indicates a failure of the linearity assumption.**
+
+### Constant Variance Assumption
+
+The scale-location plot shows a systematic deviation of the residuals. The plot shows an upward trend, or in other words, the standardized residuals are systematically above the line at higher fitted values. This pattern **indicates a failure of the constant variance assumption**.
+
+### Normality Assumption
+
+The right side of the Q-Q plot shows a systematic deviation away from the dashed line. The residuals have a longer "right tail" than would be expected if the residuals really were normal, and thus the **normality assumption is likely violated for the fuel economy dataset**.
+
+Overall, the diagnostic plots suggest that several regression assumptions (linearity, constant variance, and normality) are violated for the fuel economy data. Given this, we will now attempt to improve the model using transformations.
+
+### Box-cox transformation
+
+```{r}
+bc <- MASS::boxcox(hwy_lm)
+```
+
+Given that the data prefers somewhere in between $\lambda$ = 0 and $\lambda$ = $\frac{1}{2}$ in the Box-Cox plot, we will try both log and square-root transformations to compare and contrast how each transformation affects the model assumptions and overall fit.
+
+### Log transformation
+
+```{r}
+log_lm <- lm(log(hwy) ~ displ + drv + class, data = mpg)
+summary(log_lm)
+autoplot(log_lm)
+```
+
+#### Linearity Assumption
+
+In the residuals vs. fitted plot for the log-transformed model, the residuals appear more symmetrically scattered around zero, and the curved pattern has improved to be much flatter. While there still are some areas where residuals are either above the horizontal line or below the horizontal line, **the log transformation seems to have improved the linearity assumption.**
+
+#### Constant Variance Assumption
+
+The scale-location plot also shows a flatter, less curvy trend compared to the un-transformed model. The standardized residuals are more evenly scattered around the line and the upward trend at the right side of the plot has improved. **The constant variance assumption is improved.**
+
+#### Normality Assumption
+
+In the Q-Q plot, the residuals are closer to the line than in the original model, especially in the right tail. The right tail 's fit has improved greatly and the deviation has become less severe. However, the left tail bends downward more greatly than before, indicating ta slightly worse fit in the region. **Overall, the normality assumption is somewhat improved, while not entirely.**
+
+### Square-root transformation
+
+```{r}
+sqrt_lm <- lm(sqrt(hwy) ~ displ + drv + class, data = mpg)
+summary(sqrt_lm)
+autoplot(sqrt_lm)
+```
+
+#### Linearity Assumption
+
+In the residuals vs. fitted plot for the square-root-transformed model, the residuals appear more symmetrically scattered around zero, and the curved pattern has improved to be much flatter than the original model. While there still are some areas where residuals are either above the horizontal line or below the horizontal line, **the square-root transformation seems to have improved the linearity assumption.** There are **no noticeable differences in the improvement compared to the log-transformation.**
+
+#### Constant Variance Assumption
+
+The scale-location plot also shows a flatter, less curvy trend compared to the un-transformed model. The standardized residuals are more evenly scattered around the line and the upward trend at the right side of the plot has improved. **The constant variance assumption is improved.** However, compared to the log-transformation's, the square-root model exhibits a more noticeable and larger upward trend at the right side of the plot, **making the log-transformation more preferable when it comes to selecting**.
+
+#### Normality Assumption
+
+In the Q-Q plot, the residuals for the square-root model are closer to the line than in the original model, especially in the right tail. The right tail 's fit has improved greatly and the deviation has become less severe. However, the left tail bends downward more greatly than before, indicating ta slightly worse fit in the region. **Overall, the normality assumption is somewhat improved, while not entirely. Compared to the log-transformation's, the square-root transformation shows less left-tail deviation but greater right-tail deviation.**
 
 ## Formal Hypothesis Tests
 
