@@ -264,9 +264,69 @@ After splining displacement against highway mpg, we can visually see a line that
 
 The model containing the spline relationship shows an improvement for normally distributed standard residuals, but the Scale-Location plot and Residuals vs. Fitted do not look any better than the original model without any splining. It is worth mentioning that that the improvements in the Normal Q-Q plot are only seen on the left side of the graph. The right still contains systematic deviations away from the line.
 
+### Interaction
+```{r}
+log_interaction_lm <- lm(log(hwy) ~ displ * drv + class, data = mpg)
+summary(log_interaction_lm)
+```
+
+Main Effects
+- Car Class Type
+- Displacement
+- Drive Train Type
+Interactions 
+- Displacement and Drive Train Type
+
+The interactions between displacement and drive train type are not significant. Our P-value is very large, indicating that the effects of displacement on highway mpg does not depend on drive train. There is no evidence that the interactions improve the model, as the Multiple R-squared value for the log model with interactions is the same without interactions.
+
+```{r}
+anova(log_lm, log_interaction_lm)
+```
+Performing anova between the model with and without the interactions, we can also see the P-value is again quite large, indicating that there is not evidence to support that the interaction terms improve the model.
+
 ## Formal Hypothesis Tests
 
 (Your text here)
+
+
+
+
+**Hypothesis 1**: Vehicles with larger engines (higher `displ` value) have lower highway fuel efficiency.
+
+- We assume that cars with larger engines will burn more fuel.
+- Null Hypothesis: Engine displacement has no effect on fuel consumption.
+- Alternative Hypothesis: Engine displacement has an effect fuel consumption.
+```{r}
+summary(log_lm)
+```
+We can see that for displacement (displ), we have a non-zero slope with a significant p-value. This means we can reject our null hypothesis, and say that engine displacement does have an effect on highway mpg.
+
+We can see that displacement does have an effect on on fuel consumption.
+
+
+**Hypothesis 2**: SUV and pickup trucks have lower highway MPG than compact or midsize cars.
+-   We assume those bigger and heavier vehicle classes require more energy and thus less fuel economy efficiency.
+- Null Hypothesis: All types of cars have the same MPG.
+- Alternative Hypothesis: At least one type of car class has a different MPG.
+```{r}
+hypothesis_2 <- lm(log(hwy) ~ class, data = mpg)
+anova(hypothesis_2)
+summary(log_lm)
+```
+We have evidence to support that we should reject the null hypothesis. In the anova, we can see we have a significant p-value, and when looking at the summary, each class of car has a fairly small p-value, meanining that when we control the other variables, we can expect to see difference in MPG. Relating back to our original hypothesis, we can see that SUV has the most negative slope, indicating that on average, SUVs get the worst MPG on the highway when controlling the other factors.
+
+**Hypothesis 3**: Front-wheel drive vehicles have higher highway MPG than four-wheel drive or rear-wheel drive vehicles.
+-   We assume that for daily use, front-wheel drive, which sends power only to the front wheels, would be more efficient than four-wheel drive, which distributes power to all four wheels or rear-wheel drive, which powers the rear wheels (front wheels only steer).
+- Null Hypothesis: All drive trains have the same MPG.
+- Alternative Hypothesis: At least one drive train type has a different MPG than the rest.
+```{r}
+hypothesis_3 <- lm(log(hwy) ~ drv, data = mpg)
+anova(hypothesis_3)
+summary(log_lm)
+```
+Based on the P-value from the anova (< 2.2e-16), we have decent evidence that at least one type of drive train has a different MPG on average than the rest of the drive train types.
+
+When looking at the summary for the model, we have P-values that again support reject the null hypothesis. This evidence is not the strongest though with rear wheel drive cars having a p-value of 0.015376. Based on the slope, it looks like front wheel drive cars do get the better MPG on average than the other 2 car classes when holding the other variables constant, as drvf has the most positive slope value.
 
 ## Robustness of Results
 
