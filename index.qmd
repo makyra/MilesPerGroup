@@ -427,8 +427,9 @@ lm_all =  lm(log(hwy) ~ displ + drv + class + year + cyl + fl, data = mpg)
 all_subsets <- lmSubsets(log(hwy) ~ displ + drv + class + year + fl, data = mpg)
 lmSelect(all_subsets, penalty = "AIC")
 ```
-Using subsets for the automatic model selection, the best model used formula = log(hwy) ~ displ + drv + class + year + fl. While the automatic selection said the best model used all of the variables, some of them are likely correlated or have some type of interaction that needs to be checked. For example, generally as you have more cylinders, you will have high displacement because displacement is a sum of all the volume displaced by all cylinders.
+Using subsets for the automatic model selection, the best model used formula = log(hwy) ~ displ + drv + class + year + fl. While the automatic selection said the best model used all of the variables given, some of them are likely correlated or have some type of interaction that needs to be checked. For example, generally as you have more cylinders, you will have high displacement because displacement is a sum of all the volume displaced by all cylinders.
 
+In the model we chose,we did not use everything because we thought certain columns were not the most relevant like year and make/model or likely related like displacement and cylinders. We can see the R-squared went up, so given more time to explore, it might be worth trying models that include more variables, but we were worried about overfitting by including everything.
 
 Generally, P-values become invalid after doing an automatic model selection. To get valid P-values, we would have to fit the model given on an data set that was not used.
 
