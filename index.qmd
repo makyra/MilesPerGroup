@@ -386,16 +386,10 @@ Additionally, when looking at drive train, we also saw the beetle appear when lo
 
 I'm inclined to remove the Corvettes as they appeared multiple times when checking the thresholds.
 ```{r}
-
-
-## Subset the data to remove Libya
 mpg_no_corvette <- mpg[-c(24, 25, 28),]
                            
-
-## Fit the model
 mpg_lm_no_corvette <- lm(log(hwy) ~ displ + drv + class, data = mpg_no_corvette)
 
-## Get a summary
 summary(mpg_lm_no_corvette)
 
 summary(log_lm)
@@ -404,9 +398,27 @@ After removing the corvettes, all of our predictors still had a significant p-va
 
 ```{r}
 vif(log_lm)
-
 ```
 Our values are fairly close to 1. They are all between 1 and 2, meaning we likely do not have any issues with multicolinearity.
+
+```{r}
+loo_predictions <- function(fit) {
+  e <- residuals(fit)
+  h <- hatvalues(fit)
+  Y <- fitted(fit) + e
+  return(Y - e / (1 - h))
+}
+```
+
+```{r}
+loo_log_lm <- loo_predictions(log_lm)
+cor(loo_log_lm, log(mpg$hwy))^2
+```
+The leave-one-out prediction error is 0.8294151 (LOO R^2)
+
+Multiple R-squared:  0.842,	Adjusted R-squared:  0.8356 
+
+The LOO R^2 value is 0.0125849 less than the R-squared value. Since they are quite close in value, we have strong evidence that the model is not overfit.
 
 ## Conclusions
 
