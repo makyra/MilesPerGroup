@@ -337,13 +337,70 @@ influencePlot(log_lm)
 Looking at the leverage plot, we can see 44, 25, and 222, and when looking at the leverage plot, 24, 28, and 213 are influential data points.
 
 ```{r}
-log_lm_dfbetas <- dfbetas(log_lm)
-head(log_lm_dfbetas)
+influential_rows <- c(24, 25, 28, 44, 213, 222)
+influential_observations <- mpg[influential_rows, ]
 
+log_lm_dfbetas <- dfbetas(log_lm)
+influential_subset <- log_lm_dfbetas[influential_rows, ]
+influential_subset
+```
+Looking at this subset, observation 25 appears to have a decent impact on intercept, displ, and all of the car class slopes. 213 nad 222 have somewhat large impacts on the drive train as well. We can use the thresh hold value to further confirm if these values are impactful to our slopes.
+```{r}
 N <- nrow(mpg)
 
 threshold <- 3 / sqrt(N)
+mpg[influential_rows,]
+
 ```
+```{r}
+subset(mpg, abs(log_lm_dfbetas[,"displ"]) > threshold)
+```
+```{r}
+subset(mpg, abs(log_lm_dfbetas[,"drvf"]) > threshold)
+```
+```{r}
+subset(mpg, abs(log_lm_dfbetas[,"drvr"]) > threshold)
+```
+```{r}
+subset(mpg, abs(log_lm_dfbetas[,"classcompact"]) > threshold)
+```
+```{r}
+subset(mpg, abs(log_lm_dfbetas[,"classmidsize"]) > threshold)
+```
+```{r}
+subset(mpg, abs(log_lm_dfbetas[,"classminivan"]) > threshold)
+```
+```{r}
+subset(mpg, abs(log_lm_dfbetas[,"classpickup"]) > threshold)
+```
+```{r}
+subset(mpg, abs(log_lm_dfbetas[,"classsubcompact"]) > threshold)
+```
+```{r}
+subset(mpg, abs(log_lm_dfbetas[,"classsuv"]) > threshold)
+```
+
+Looking at all of the subsets for the different predictors with values exceeding our threshold, the corvette models identified in the graphs also appear when looking at its influence in the slopes for the car classes.
+
+Additionally, when looking at drive train, we also saw the beetle appear when looking at the threshold for front wheel drive.
+
+I'm inclined to remove the Corvettes as they appeared multiple times when checking the thresholds.
+```{r}
+
+
+## Subset the data to remove Libya
+mpg_no_corvette <- mpg[-c(24, 25, 28),]
+                           
+
+## Fit the model
+mpg_lm_no_corvette <- lm(log(hwy) ~ displ + drv + class, data = mpg_no_corvette)
+
+## Get a summary
+summary(mpg_lm_no_corvette)
+
+summary(log_lm)
+```
+After removing the corvettes, all of our predictors still had a significant p-value for their slopes. We can see that the estimates had changed, but they all changes by a value between 0.01 to 0.06. In terms of miles per gallon, I do not find that to be large enough of a change to consider dropping the corvette observations from the model.
 
 ```{r}
 vif(log_lm)
