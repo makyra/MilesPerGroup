@@ -329,8 +329,18 @@ Based on the P-value from the anova (< 2.2e-16), we have decent evidence that at
 When looking at the summary for the model, we have P-values that again support reject the null hypothesis. This evidence is not the strongest though with rear wheel drive cars having a p-value of 0.015376. Based on the slope, it looks like front wheel drive cars do get the better MPG on average than the other 2 car classes when holding the other variables constant, as drvf has the most positive slope value.
 
 ## Robustness of Results
+```{r}
+autoplot(log_lm)
+library(car)
+influencePlot(log_lm)
+```
+Looking at the leverage plot, we can see 44, 25, and 222, and when looking at the leverage plot, 24, 28, and 213 are influential data points.
 
-(Your text here)
+```{r}
+vif(log_lm)
+
+```
+Our values are fairly close to 1. They are all between 1 and 2, meaning we likely do not have any issues with multicolinearity.
 
 ## Conclusions
 
