@@ -428,6 +428,14 @@ vif(log_lm)
 Our values are fairly close to 1. They are all between 1 and 2, meaning we likely do not have any issues with multicolinearity.
 
 ```{r}
+library(DAAG)
+press_stat <- press(log_lm)
+press_rmse <- sqrt(press_stat / nrow(mpg))
+summary(log_lm)
+press_rmse
+```
+We can see that the press_rmse value and the Residual Standard Error are fairly close. This is an indication that our model is not over fit.
+```{r}
 loo_predictions <- function(fit) {
   e <- residuals(fit)
   h <- hatvalues(fit)
