@@ -337,6 +337,15 @@ influencePlot(log_lm)
 Looking at the leverage plot, we can see 44, 25, and 222, and when looking at the leverage plot, 24, 28, and 213 are influential data points.
 
 ```{r}
+log_lm_dfbetas <- dfbetas(log_lm)
+head(log_lm_dfbetas)
+
+N <- nrow(mpg)
+
+threshold <- 3 / sqrt(N)
+```
+
+```{r}
 vif(log_lm)
 
 ```
