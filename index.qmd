@@ -1,6 +1,6 @@
 ---
 title: ""
-author: "Miles per Group (MPG): Makyra Kim, Alexandar Gomez"
+author: "Miles per Group (MPG): Makyra Kim, Alexander Gomez"
 format: html
 ---
 
@@ -420,6 +420,25 @@ Multiple R-squared:  0.842,	Adjusted R-squared:  0.8356
 
 The LOO R^2 value is 0.0125849 less than the R-squared value. Since they are quite close in value, we have strong evidence that the model is not overfit.
 
+## Automatic Model Selection
+```{r}
+library(lmSubsets)
+lm_all =  lm(log(hwy) ~ displ + drv + class + year + cyl + fl, data = mpg)
+all_subsets <- lmSubsets(log(hwy) ~ displ + drv + class + year + fl, data = mpg)
+lmSelect(all_subsets, penalty = "AIC")
+```
+Using subsets for the automatic model selection, the best model used formula = log(hwy) ~ displ + drv + class + year + fl. While the automatic selection said the best model used all of the variables, some of them are likely correlated or have some type of interaction that needs to be checked. For example, generally as you have more cylinders, you will have high displacement because displacement is a sum of all the volume displaced by all cylinders.
+
+
+Generally, P-values become invalid after doing an automatic model selection. To get valid P-values, we would have to fit the model given on an data set that was not used.
+
 ## Conclusions
 
-(Your text here)
+After exploring the dataset, we were quite surprised to find that the drive train was a relevant predictor for highway mpg. Our initial thought process was that we could take the same engine, and swap it into a car that was front wheel drive, rear wheel drive, and all wheel drive, and see the same fuel mpg assume everything else about the car was the same. It would be interesting to see if this was directly caused by the drive train (maybe energy from the engine is lost by having to move more wheels or going from the front of the car to the back), or if certain types of engine are used in those car types leading to the difference observed. We tried checking this with the interactions between displacement and drive train, but found no evidence of interaction.
+
+Unsurprisingly, engines with larger displacement and SUVs tended to have a lower predicted MPG when holding the other variables constant. To us this makes sense as SUVs are larger and probably weigh more while being less aerodynamic, demanding more energy use from the engine than what a smaller car would. For displacement, we thought this made sense as well since a single rotation, a lower displacement would need less fuel to fill the cylinder volumes for combustion than one with more displacement.
+
+***Future Research:***
+I think some additional variables that would be helpful/relevent for this would be to include things like an aerodynamic rating for the cars and a binary columns for whether a vehicle has a tubro, and another for being a hybrid. I would think these are other factors that could be used to predict the highway mpg.
+
+More generally, I think it would be interesting to research whether or not MPG has improved with newer cars or not. In the US, it feels like cars keep getting bigger/heavier, so I would expect that MPG keeps getting worse even if engine technology has improved. I would think having larger/bigger cars would lead to having to use engines that are less fuel efficent to power them, so it would be interesting to see if that is the case.
