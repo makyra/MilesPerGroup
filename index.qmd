@@ -248,6 +248,7 @@ The scale-location plot also shows a flatter, less curvy trend compared to the u
 In the Q-Q plot, the residuals for the square-root model are closer to the line than in the original model, especially in the right tail. The right tail 's fit has improved greatly and the deviation has become less severe. However, the left tail bends downward more greatly than before, indicating ta slightly worse fit in the region. **Overall, the normality assumption is somewhat improved, while not entirely. Compared to the log-transformation's, the square-root transformation shows less left-tail deviation but greater right-tail deviation.**
 
 ### Splining
+
 ```{r}
 library(splines)
 mpg_spline <- lm(hwy ~ bs(displ, 3), data = mpg)
@@ -260,80 +261,91 @@ lines(mpg$displ[sorted_idx], predict(mpg_spline)[sorted_idx], col = 4, lwd = 2)
 mpg_spline <- lm(hwy ~ bs(displ, 3) + drv + class, data = mpg)
 autoplot(mpg_spline)
 ```
+
 After splining displacement against highway mpg, we can visually see a line that fits the data better than a linear model, but for the entire model, this may not lead to an improvment.
 
 The model containing the spline relationship shows an improvement for normally distributed standard residuals, but the Scale-Location plot and Residuals vs. Fitted do not look any better than the original model without any splining. It is worth mentioning that that the improvements in the Normal Q-Q plot are only seen on the left side of the graph. The right still contains systematic deviations away from the line.
 
 ### Interaction
+
 ```{r}
 log_interaction_lm <- lm(log(hwy) ~ displ * drv + class, data = mpg)
 summary(log_interaction_lm)
 ```
 
-Main Effects
-- Car Class Type
-- Displacement
-- Drive Train Type
-Interactions 
-- Displacement and Drive Train Type
+**Main Effects**
+
+-   Car Class Type
+
+-   Displacement
+
+-   Drive Train Type
+
+**Interactions**
+
+-   Displacement and Drive Train Type
 
 The interactions between displacement and drive train type are not significant. Our P-value is very large, indicating that the effects of displacement on highway mpg does not depend on drive train. There is no evidence that the interactions improve the model, as the Multiple R-squared value for the log model with interactions is the same without interactions.
 
 ```{r}
 anova(log_lm, log_interaction_lm)
 ```
+
 Performing anova between the model with and without the interactions, we can also see the P-value is again quite large, indicating that there is not evidence to support that the interaction terms improve the model.
 
 ## Formal Hypothesis Tests
 
-(Your text here)
-
-
-
-
 **Hypothesis 1**: Vehicles with larger engines (higher `displ` value) have lower highway fuel efficiency.
 
-- We assume that cars with larger engines will burn more fuel.
-- Null Hypothesis: Engine displacement has no effect on fuel consumption.
-- Alternative Hypothesis: Engine displacement has an effect fuel consumption.
+-   Null Hypothesis: Engine displacement has no effect on fuel consumption.
+-   Alternative Hypothesis: Engine displacement has an effect fuel consumption.
+
 ```{r}
 summary(log_lm)
 ```
+
 We can see that for displacement (displ), we have a non-zero slope with a significant p-value. This means we can reject our null hypothesis, and say that engine displacement does have an effect on highway mpg.
 
 We can see that displacement does have an effect on on fuel consumption.
 
-
 **Hypothesis 2**: SUV and pickup trucks have lower highway MPG than compact or midsize cars.
--   We assume those bigger and heavier vehicle classes require more energy and thus less fuel economy efficiency.
-- Null Hypothesis: All types of cars have the same MPG.
-- Alternative Hypothesis: At least one type of car class has a different MPG.
+
+-   Null Hypothesis: All types of cars have the same MPG.
+
+-   Alternative Hypothesis: At least one type of car class has a different MPG.
+
 ```{r}
 hypothesis_2 <- lm(log(hwy) ~ class, data = mpg)
 anova(hypothesis_2)
 summary(log_lm)
 ```
-We have evidence to support that we should reject the null hypothesis. In the anova, we can see we have a significant p-value, and when looking at the summary, each class of car has a fairly small p-value, meanining that when we control the other variables, we can expect to see difference in MPG. Relating back to our original hypothesis, we can see that SUV has the most negative slope, indicating that on average, SUVs get the worst MPG on the highway when controlling the other factors.
+
+We have evidence to support that we should reject the null hypothesis. In the anova, we can see we have a significant p-value, and when looking at the summary, each class of car has a fairly small p-value, meaning that when we control the other variables, we can expect to see difference in MPG. Relating back to our original hypothesis, we can see that SUV has the most negative slope, indicating that on average, SUVs get the worst MPG on the highway when controlling the other factors.
 
 **Hypothesis 3**: Front-wheel drive vehicles have higher highway MPG than four-wheel drive or rear-wheel drive vehicles.
--   We assume that for daily use, front-wheel drive, which sends power only to the front wheels, would be more efficient than four-wheel drive, which distributes power to all four wheels or rear-wheel drive, which powers the rear wheels (front wheels only steer).
-- Null Hypothesis: All drive trains have the same MPG.
-- Alternative Hypothesis: At least one drive train type has a different MPG than the rest.
+
+-   Null Hypothesis: All drive trains have the same MPG.
+
+-   Alternative Hypothesis: At least one drive train type has a different MPG than the rest.
+
 ```{r}
 hypothesis_3 <- lm(log(hwy) ~ drv, data = mpg)
 anova(hypothesis_3)
 summary(log_lm)
 ```
-Based on the P-value from the anova (< 2.2e-16), we have decent evidence that at least one type of drive train has a different MPG on average than the rest of the drive train types.
 
-When looking at the summary for the model, we have P-values that again support reject the null hypothesis. This evidence is not the strongest though with rear wheel drive cars having a p-value of 0.015376. Based on the slope, it looks like front wheel drive cars do get the better MPG on average than the other 2 car classes when holding the other variables constant, as drvf has the most positive slope value.
+Based on the P-value from the anova (\< 2.2e-16), we have decent evidence that at least one type of drive train has a different MPG on average than the rest of the drive train types.
+
+When looking at the summary for the model, we have P-values that again supports to reject the null hypothesis. This evidence is not the strongest though with rear wheel drive cars having a p-value of 0.015376. Based on the slope, it looks like front wheel drive cars do get the better MPG on average than the other 2 car classes when holding the other variables constant, as drvf has the most positive slope value.
 
 ## Robustness of Results
+
 ```{r}
 autoplot(log_lm)
 library(car)
 influencePlot(log_lm)
 ```
+
 Looking at the leverage plot, we can see 44, 25, and 222, and when looking at the leverage plot, 24, 28, and 213 are influential data points.
 
 ```{r}
@@ -344,7 +356,9 @@ log_lm_dfbetas <- dfbetas(log_lm)
 influential_subset <- log_lm_dfbetas[influential_rows, ]
 influential_subset
 ```
-Looking at this subset, observation 25 appears to have a decent impact on intercept, displ, and all of the car class slopes. 213 nad 222 have somewhat large impacts on the drive train as well. We can use the thresh hold value to further confirm if these values are impactful to our slopes.
+
+Looking at this subset, observation 25 appears to have a decent impact on intercept, displ, and all of the car class slopes. 213 and 222 have somewhat large impacts on the drive train as well. We can use the threshhold value to further confirm if these values are impactful to our slopes.
+
 ```{r}
 N <- nrow(mpg)
 
@@ -352,30 +366,39 @@ threshold <- 3 / sqrt(N)
 mpg[influential_rows,]
 
 ```
+
 ```{r}
 subset(mpg, abs(log_lm_dfbetas[,"displ"]) > threshold)
 ```
+
 ```{r}
 subset(mpg, abs(log_lm_dfbetas[,"drvf"]) > threshold)
 ```
+
 ```{r}
 subset(mpg, abs(log_lm_dfbetas[,"drvr"]) > threshold)
 ```
+
 ```{r}
 subset(mpg, abs(log_lm_dfbetas[,"classcompact"]) > threshold)
 ```
+
 ```{r}
 subset(mpg, abs(log_lm_dfbetas[,"classmidsize"]) > threshold)
 ```
+
 ```{r}
 subset(mpg, abs(log_lm_dfbetas[,"classminivan"]) > threshold)
 ```
+
 ```{r}
 subset(mpg, abs(log_lm_dfbetas[,"classpickup"]) > threshold)
 ```
+
 ```{r}
 subset(mpg, abs(log_lm_dfbetas[,"classsubcompact"]) > threshold)
 ```
+
 ```{r}
 subset(mpg, abs(log_lm_dfbetas[,"classsuv"]) > threshold)
 ```
@@ -385,6 +408,7 @@ Looking at all of the subsets for the different predictors with values exceeding
 Additionally, when looking at drive train, we also saw the beetle appear when looking at the threshold for front wheel drive.
 
 I'm inclined to remove the Corvettes as they appeared multiple times when checking the thresholds.
+
 ```{r}
 mpg_no_corvette <- mpg[-c(24, 25, 28),]
                            
@@ -394,11 +418,13 @@ summary(mpg_lm_no_corvette)
 
 summary(log_lm)
 ```
+
 After removing the corvettes, all of our predictors still had a significant p-value for their slopes. We can see that the estimates had changed, but they all changes by a value between 0.01 to 0.06. In terms of miles per gallon, I do not find that to be large enough of a change to consider dropping the corvette observations from the model.
 
 ```{r}
 vif(log_lm)
 ```
+
 Our values are fairly close to 1. They are all between 1 and 2, meaning we likely do not have any issues with multicolinearity.
 
 ```{r}
@@ -414,22 +440,25 @@ loo_predictions <- function(fit) {
 loo_log_lm <- loo_predictions(log_lm)
 cor(loo_log_lm, log(mpg$hwy))^2
 ```
-The leave-one-out prediction error is 0.8294151 (LOO R^2)
 
-Multiple R-squared:  0.842,	Adjusted R-squared:  0.8356 
+The leave-one-out prediction error is 0.8294151 (LOO R\^2)
 
-The LOO R^2 value is 0.0125849 less than the R-squared value. Since they are quite close in value, we have strong evidence that the model is not overfit.
+Multiple R-squared: 0.842, Adjusted R-squared: 0.8356
+
+The LOO R\^2 value is 0.0125849 less than the R-squared value. Since they are quite close in value, we have strong evidence that the model is not overfit.
 
 ## Automatic Model Selection
+
 ```{r}
 library(lmSubsets)
 lm_all =  lm(log(hwy) ~ displ + drv + class + year + cyl + fl, data = mpg)
 all_subsets <- lmSubsets(log(hwy) ~ displ + drv + class + year + fl, data = mpg)
 lmSelect(all_subsets, penalty = "AIC")
 ```
-Using subsets for the automatic model selection, the best model used formula = log(hwy) ~ displ + drv + class + year + fl. While the automatic selection said the best model used all of the variables given, some of them are likely correlated or have some type of interaction that needs to be checked. For example, generally as you have more cylinders, you will have high displacement because displacement is a sum of all the volume displaced by all cylinders.
 
-In the model we chose,we did not use everything because we thought certain columns were not the most relevant like year and make/model or likely related like displacement and cylinders. We can see the R-squared went up, so given more time to explore, it might be worth trying models that include more variables, but we were worried about overfitting by including everything.
+Using subsets for the automatic model selection, the best model used formula = log(hwy) \~ displ + drv + class + year + fl. While the automatic selection said the best model used all of the variables given, some of them are likely correlated or have some type of interaction that needs to be checked. For example, generally as you have more cylinders, you will have high displacement because displacement is a sum of all the volume displaced by all cylinders.
+
+In the model we chose, we did not use everything because we thought certain columns were not the most relevant like year and make/model or likely related like displacement and cylinders. We can see the R-squared went up, so given more time to explore, it might be worth trying models that include more variables, but we were worried about overfitting by including everything.
 
 Generally, P-values become invalid after doing an automatic model selection. To get valid P-values, we would have to fit the model given on an data set that was not used.
 
@@ -439,7 +468,6 @@ After exploring the dataset, we were quite surprised to find that the drive trai
 
 Unsurprisingly, engines with larger displacement and SUVs tended to have a lower predicted MPG when holding the other variables constant. To us this makes sense as SUVs are larger and probably weigh more while being less aerodynamic, demanding more energy use from the engine than what a smaller car would. For displacement, we thought this made sense as well since a single rotation, a lower displacement would need less fuel to fill the cylinder volumes for combustion than one with more displacement.
 
-***Future Research:***
-I think some additional variables that would be helpful/relevent for this would be to include things like an aerodynamic rating for the cars and a binary columns for whether a vehicle has a tubro, and another for being a hybrid. I would think these are other factors that could be used to predict the highway mpg.
+***Future Research:*** We think some additional variables that would be helpful/relevant for this would be to include things like an aerodynamic rating for the cars and a binary columns for whether a vehicle has a turbo, and another for being a hybrid. We would think these are other factors that could be used to predict the highway mpg.
 
-More generally, I think it would be interesting to research whether or not MPG has improved with newer cars or not. In the US, it feels like cars keep getting bigger/heavier, so I would expect that MPG keeps getting worse even if engine technology has improved. I would think having larger/bigger cars would lead to having to use engines that are less fuel efficent to power them, so it would be interesting to see if that is the case.
+More generally, we think it would be interesting to research whether or not MPG has improved with newer cars or not. In the US, it feels like cars keep getting bigger/heavier, so we would expect that MPG keeps getting worse even if engine technology has improved. We would think having larger/bigger cars would lead to having to use engines that are less fuel efficient to power them, so it would be interesting to see if that is the case.
